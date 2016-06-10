@@ -1,11 +1,12 @@
 import time
 from dronekit import LocationGlobalRelative
 from Mission_Auto import Mission_Auto
-from ..zigbee.XBee_Packet import XBee_Packet
+from ..zigbee.Packet import Packet
 
-class Mission_XBee(Mission_Auto):
+class Mission_RF_Sensor(Mission_Auto):
     def setup(self):
-        super(Mission_XBee, self).setup()
+        super(Mission_RF_Sensor, self).setup()
+
         self.environment.add_packet_action("waypoint_clear", self._clear_waypoints)
         self.environment.add_packet_action("waypoint_add", self._add_waypoint)
         self.environment.add_packet_action("waypoint_done", self._complete_waypoints)
@@ -13,16 +14,17 @@ class Mission_XBee(Mission_Auto):
         self._waypoints_complete = False
         self._next_index = 0
 
+        self._rf_sensor = self.environment.get_rf_sensor()
+
     def arm_and_takeoff(self):
         # Wait until all the waypoints have been received before arming.
         while not self._waypoints_complete:
             time.sleep(1)
 
-        super(Mission_XBee, self).arm_and_takeoff()
+        super(Mission_RF_Sensor, self).arm_and_takeoff()
 
     def _complete_waypoints(self, packet):
-        xbee_sensor = self.environment.get_xbee_sensor()
-        if xbee_sensor.id != packet.get("to_id"):
+        if self._rf_sensor.id != packet.get("to_id"):
             # Ignore packets not meant for us.
             return
 
@@ -65,22 +67,19 @@ class Mission_XBee(Mission_Auto):
         otherwise.
         """
 
-        xbee_sensor = self.environment.get_xbee_sensor()
+        packet = Packet()
+        packet.set("specification", "waypoint_ack")
+        packet.set("next_index", self._next_index)
+        packet.set("sensor_id", self._rf_sensor.id)
 
-        ack_packet = XBee_Packet()
-        ack_packet.set("specification", "waypoint_ack")
-        ack_packet.set("next_index", self._next_index)
-        ack_packet.set("sensor_id", xbee_sensor.id)
-
-        xbee_sensor.enqueue(ack_packet, to=0)
+        self._rf_sensor.enqueue(packet, to=0)
 
     def _clear_waypoints(self, packet):
         """
         Clear the mission waypoints after receiving a "waypoint_clear" packet.
         """
 
-        xbee_sensor = self.environment.get_xbee_sensor()
-        if xbee_sensor.id != packet.get("to_id"):
+        if self._rf_sensor.id != packet.get("to_id"):
             # Ignore packets not meant for us.
             return
 
@@ -94,13 +93,12 @@ class Mission_XBee(Mission_Auto):
         """
         Add a waypoint to the mission based on a "waypoint_add" packet.
 
-        The packet must have the XBee sensor ID in the "to_id" field and the
+        The packet must have the RF sensor ID in the "to_id" field and the
         index must be the next waypoint index; otherwise, the waypoint is not
         added to the vehicle's waypoints.
         """
 
-        xbee_sensor = self.environment.get_xbee_sensor()
-        if xbee_sensor.id != packet.get("to_id"):
+        if self._rf_sensor.id != packet.get("to_id"):
             # Ignore packets not meant for us.
             return
 

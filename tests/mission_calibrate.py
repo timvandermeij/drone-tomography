@@ -11,7 +11,7 @@ class TestMissionCalibrate(EnvironmentTestCase):
             "--vehicle-class", "Robot_Vehicle_Arduino",
             "--geometry-class", "Geometry", "--space-size", "5",
             "--number-of-sensors", "2", "--closeness", "0",
-            "--xbee-synchronization"
+            "--rf-sensor-synchronization"
         ], use_infrared_sensor=False)
 
         super(TestMissionCalibrate, self).setUp()
@@ -20,7 +20,6 @@ class TestMissionCalibrate(EnvironmentTestCase):
 
         settings = self.arguments.get_settings("mission")
         self.mission = Mission_Calibrate(self.environment, settings)
-        self.xbee = self.environment.get_xbee_sensor()
         self.first_waypoints = [
             (1, 0), (2, 0), (3, 0), (4, 0),
             (4, 1), (4, 2), (4, 3), (4, 4),

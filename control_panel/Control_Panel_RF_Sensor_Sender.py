@@ -1,10 +1,10 @@
 from functools import partial
 from PyQt4 import QtGui, QtCore
-from ..zigbee.XBee_Packet import XBee_Packet
+from ..zigbee.Packet import Packet
 
-class Control_Panel_XBee_Sender(object):
+class Control_Panel_RF_Sensor_Sender(object):
     """
-    Handler for sending status changes to the XBee devices on the vehicles.
+    Handler for sending packets to the RF sensors on the vehicles.
     """
 
     def __init__(self, controller, data, total, configuration):
@@ -61,11 +61,11 @@ class Control_Panel_XBee_Sender(object):
             self._send_clear(vehicle)
 
     def _send_clear(self, vehicle):
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", self._clear_message)
         packet.set("to_id", vehicle)
 
-        self._controller.xbee.enqueue(packet, to=vehicle)
+        self._controller.rf_sensor.enqueue(packet, to=vehicle)
 
         self._set_label(vehicle, "Clearing old {}s".format(self._name))
         self._timers[vehicle].start()
@@ -77,10 +77,10 @@ class Control_Panel_XBee_Sender(object):
         if self._is_done(vehicle):
             # Enqueue a packet indicating that sending data to this vehicle is 
             # done.
-            packet = XBee_Packet()
+            packet = Packet()
             packet.set("specification", self._done_message)
             packet.set("to_id", vehicle)
-            self._controller.xbee.enqueue(packet, to=vehicle)
+            self._controller.rf_sensor.enqueue(packet, to=vehicle)
 
             self._update_value()
             if all(self._is_done(vehicle) for vehicle in self._indexes):
@@ -93,7 +93,7 @@ class Control_Panel_XBee_Sender(object):
 
         packet = self._add_callback(vehicle, index, data)
 
-        self._controller.xbee.enqueue(packet, to=vehicle)
+        self._controller.rf_sensor.enqueue(packet, to=vehicle)
 
         self._set_label(vehicle, "Sending {} #{}: {}".format(self._name, index+1, data))
         self._timers[vehicle].start()

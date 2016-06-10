@@ -3,8 +3,9 @@ from VRMLLoader import VRMLLoader
 
 class Environment_Simulator(Environment):
     """
-    Simulated environment including objects around the vehicle and potentially the vehicle itself.
-    This allows us to simulate a mission without many dependencies on ArduPilot.
+    Simulated environment including objects around the vehicle
+    and potentially the vehicle itself. This allows us to simulate
+    a mission without many dependencies on ArduPilot.
     """
 
     _sensor_class = "Distance_Sensor_Simulator"

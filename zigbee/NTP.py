@@ -1,7 +1,7 @@
 import os
 import subprocess
 import time
-from XBee_Packet import XBee_Packet
+from Packet import Packet
 
 class NTP(object):
     def __init__(self, sensor):
@@ -19,7 +19,7 @@ class NTP(object):
         """
 
         # Construct the NTP packet.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "ntp")
         packet.set("sensor_id", self._sensor.id)
         packet.set("timestamp_1", time.time())

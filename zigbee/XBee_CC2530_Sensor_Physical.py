@@ -8,7 +8,7 @@ import time
 import thread
 from ..core.WiringPi import WiringPi
 from NTP import NTP
-from XBee_Packet import XBee_Packet
+from Packet import Packet
 from XBee_Sensor import XBee_Sensor, SensorClosedError
 
 class Raspberry_Pi_GPIO_Pin_Mode(object):
@@ -36,7 +36,7 @@ class XBee_CC2530_Sensor_Physical(XBee_Sensor):
         """
         Initialize the physical XBee CC2530 sensor. We use the CC2530 sensor
         for exchanging packets and performing RSSI measurements, but the
-        data that we transfer is packed as XBee packets.
+        data that we transfer is packed a `Packet` objects.
         """
 
         self._type = "xbee_cc2530_sensor_physical"
@@ -180,7 +180,7 @@ class XBee_CC2530_Sensor_Physical(XBee_Sensor):
         self._discovery_callback = callback
 
         # Construct the CC2530 ping/pong packet.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "cc2530_ping_pong")
 
         # Send a ping to all sensors in the network.
@@ -240,8 +240,8 @@ class XBee_CC2530_Sensor_Physical(XBee_Sensor):
         length, data, rssi = struct.unpack(serialized_packet_format, uart_packet)
         data = data[0:length]
 
-        # Convert the raw packet to an XBee packet according to specifications.
-        packet = XBee_Packet()
+        # Convert the raw packet to a `Packet` object according to specifications.
+        packet = Packet()
         packet.unserialize(data)
 
         # Check whether the packet is not private and pass it along to the 

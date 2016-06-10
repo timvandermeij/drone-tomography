@@ -1,6 +1,6 @@
 import time
+from ..zigbee.Packet import Packet
 from ..zigbee.TDMA_Scheduler import TDMA_Scheduler
-from ..zigbee.XBee_Packet import XBee_Packet
 from ..settings import Arguments
 from settings import SettingsTestCase
 
@@ -58,7 +58,7 @@ class TestZigBeeTDMAScheduler(SettingsTestCase):
         # timestamp for sensor 2 is the timestamp of sensor 1 plus the time required
         # for one slot, defined as the total sweep time divided by the number
         # of sensors in the network.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "rssi_broadcast")
         packet.set("latitude", 123456789.12)
         packet.set("longitude", 123459678.34)
@@ -82,7 +82,7 @@ class TestZigBeeTDMAScheduler(SettingsTestCase):
         # the current sweep (as we need a full slot for sensors 6, 7 and 8).
         # We then need to add 2 - 1 = 1 slot for sensor 1 and then sensor 2 is
         # allowed to start.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "rssi_broadcast")
         packet.set("latitude", 123456789.12)
         packet.set("longitude", 123459678.34)

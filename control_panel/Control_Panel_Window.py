@@ -51,7 +51,7 @@ class Control_Panel_Window(QtGui.QMainWindow):
         Close the application and kill running threads and serial connections.
         """
 
-        self.controller.xbee.deactivate()
+        self.controller.rf_sensor.deactivate()
         self.controller.thread_manager.destroy()
         self.controller.usb_manager.clear()
 

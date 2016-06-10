@@ -1,10 +1,10 @@
 import struct
 import unittest
-from ..zigbee.XBee_Packet import XBee_Packet
+from ..zigbee.Packet import Packet
 
-class TestZigBeeXBeePacket(unittest.TestCase):
+class TestZigBeePacket(unittest.TestCase):
     def setUp(self):
-        self.packet = XBee_Packet()
+        self.packet = Packet()
 
     def test_initialization(self):
         # The packet must be empty.
@@ -61,7 +61,7 @@ class TestZigBeeXBeePacket(unittest.TestCase):
 
     def test_get_dump(self):
         # Packets other than RSSI ground station packets should not be accepted.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "waypoint_clear")
         packet.set("to_id", 5)
         with self.assertRaises(ValueError):
@@ -69,7 +69,7 @@ class TestZigBeeXBeePacket(unittest.TestCase):
 
         # RSSI ground station packets should be accepted. The return value should
         # be a list of all values in the same order as the specification.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "rssi_ground_station")
         packet.set("sensor_id", 1)
         packet.set("from_latitude", 2)
@@ -85,7 +85,7 @@ class TestZigBeeXBeePacket(unittest.TestCase):
         dump = [1, 2, 3, True, 4, 5, False, 67]
 
         # Packets other than RSSI ground station packets should not be accepted.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "waypoint_clear")
         packet.set("to_id", 5)
         with self.assertRaises(ValueError):
@@ -93,7 +93,7 @@ class TestZigBeeXBeePacket(unittest.TestCase):
 
         # RSSI ground station packets should be accepted. We verify that all
         # fields are set correctly.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "rssi_ground_station")
         packet.set_dump(dump)
 
@@ -177,8 +177,8 @@ class TestZigBeeXBeePacket(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.packet.unserialize("\n\x00\x00\x00\x00\x03bar") # Final part of packet missing
 
-        # Reset the XBee packet as the previous test changed some fields in the packet.
-        self.packet = XBee_Packet()
+        # Reset the packet as the previous test changed some fields in the packet.
+        self.packet = Packet()
 
         # Valid messages must be unpacked.
         message = "\x06H\xe1zT4o\x9dA\xf6(\\E\xa5q\x9dA\xcd\xcc\xcc\xcc\xcc\xcc\x10@\x03\x16\x00\x00\x00\x02"

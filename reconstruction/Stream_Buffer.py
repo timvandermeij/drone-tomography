@@ -32,14 +32,14 @@ class Stream_Buffer(Buffer):
                         if key not in self._calibration:
                             self._calibration[key] = packet[7]
 
-    def register_xbee(self, xbee):
+    def register_rf_sensor(self, rf_sensor):
         """
-        Register the buffer in the XBee sensor `xbee`, and request the number
+        Register the buffer in the RF sensor `rf_sensor`, and request the number
         of sensors from it.
         """
 
-        self._number_of_sensors = xbee.number_of_sensors
-        xbee.set_buffer(self)
+        self._number_of_sensors = rf_sensor.number_of_sensors
+        rf_sensor.set_buffer(self)
 
     def get(self):
         """

@@ -1,7 +1,7 @@
 from mock import MagicMock
-from ..zigbee.XBee_Packet import XBee_Packet
 from ..reconstruction.Stream_Buffer import Stream_Buffer
 from ..settings import Arguments
+from ..zigbee.Packet import Packet
 from settings import SettingsTestCase
 
 class TestReconstructionStreamBuffer(SettingsTestCase):
@@ -14,7 +14,7 @@ class TestReconstructionStreamBuffer(SettingsTestCase):
         self.settings = arguments.get_settings("reconstruction_stream")
         self.mock_sensor = MagicMock(number_of_sensors=42)
 
-        self.packet = XBee_Packet()
+        self.packet = Packet()
         self.packet.set("specification", "rssi_ground_station")
         self.packet.set("sensor_id", 1)
         self.packet.set("from_latitude", 1)
@@ -48,18 +48,18 @@ class TestReconstructionStreamBuffer(SettingsTestCase):
         # The calibration initialization reads in all packets.
         self.assertEqual(len(stream_buffer._calibration), 2)
 
-    def test_register_xbee(self):
-        # Stream buffers only know their number of sensors once an XBee is 
-        # registered. This also registers the buffer in the XBee.
+    def test_register_rf_sensor(self):
+        # Stream buffers only know their number of sensors once an RF sensor is 
+        # registered. This also registers the buffer in the RF sensor.
         stream_buffer = Stream_Buffer(self.settings)
-        stream_buffer.register_xbee(self.mock_sensor)
+        stream_buffer.register_rf_sensor(self.mock_sensor)
 
         self.assertEqual(stream_buffer.number_of_sensors, 42)
         self.mock_sensor.set_buffer.assert_called_once_with(stream_buffer)
 
     def test_get(self):
         stream_buffer = Stream_Buffer(self.settings)
-        stream_buffer.register_xbee(self.mock_sensor)
+        stream_buffer.register_rf_sensor(self.mock_sensor)
 
         # When the queue is empty, None should be returned.
         self.assertEqual(stream_buffer.get(), None)
@@ -89,7 +89,7 @@ class TestReconstructionStreamBuffer(SettingsTestCase):
         self.settings.set("stream_calibration_file",
                           "tests/reconstruction/stream_empty.json")
         stream_buffer = Stream_Buffer(self.settings)
-        stream_buffer.register_xbee(self.mock_sensor)
+        stream_buffer.register_rf_sensor(self.mock_sensor)
         stream_buffer.put(self.packet)
 
         buffer_packet, buffer_calibrated_rssi = stream_buffer.get()

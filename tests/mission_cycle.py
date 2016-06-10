@@ -12,7 +12,7 @@ class TestMissionCycle(EnvironmentTestCase):
             "--vehicle-class", "Robot_Vehicle_Arduino",
             "--geometry-class", "Geometry", "--space-size", "3",
             "--number-of-sensors", "2", "--closeness", "0",
-            "--xbee-synchronization"
+            "--rf-sensor-synchronization"
         ], use_infrared_sensor=False)
 
         super(TestMissionCycle, self).setUp()
@@ -21,7 +21,7 @@ class TestMissionCycle(EnvironmentTestCase):
 
         settings = self.arguments.get_settings("mission")
         self.mission = Mission_Cycle(self.environment, settings)
-        self.xbee = self.environment.get_xbee_sensor()
+        self.rf_sensor = self.environment.get_rf_sensor()
         self.first_waypoints = [
             (1, 0), (2, 0),
             (1, 0), (0, 0), (0, 1), (0, 2),
@@ -108,11 +108,12 @@ class TestMissionCycle(EnvironmentTestCase):
         with patch('sys.stdout'):
             self.mission.check_waypoint()
 
-        # The mission waits for the other XBee to send a valid location packet.
+        # The mission waits for the other RF sensor to send a valid location packet.
         self.vehicle._check_state()
         self.assertEqual(self.vehicle._current_waypoint, 1)
         self.assertEqual(self.vehicle.get_waypoint(), None)
-        self.assertTrue(self.environment.location_valid(other_valid=True, other_id=self.xbee.id + 1, other_index=1))
+        self.assertTrue(self.environment.location_valid(other_valid=True, other_id=self.rf_sensor.id + 1,
+                                                        other_index=1))
 
         with patch('sys.stdout'):
             self.mission.check_waypoint()

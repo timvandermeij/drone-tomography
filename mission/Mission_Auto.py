@@ -71,14 +71,14 @@ class Mission_Auto(Mission):
         Add a waypoint location object `point` to the vehicle's mission command
         waypoints.
 
-        If XBee synchronization is enabled, also adds a wait command afterward.
+        If RF sensor synchronization is enabled, also adds a wait command afterward.
         The option `required_sensors` list determines which sensors ID to wait
         for in the measurement validation.
         """
 
         self.vehicle.add_waypoint(self._convert_waypoint(point))
 
-        if self._xbee_synchronization:
+        if self._rf_sensor_synchronization:
             self.vehicle.add_wait()
             self._required_waypoint_sensors.append(required_sensors)
 
@@ -112,7 +112,7 @@ class Mission_Auto(Mission):
 
     def check_waypoint(self):
         if self.vehicle.is_wait():
-            if self._xbee_synchronization and self.environment.is_measurement_valid():
+            if self._rf_sensor_synchronization and self.environment.is_measurement_valid():
                 # The vehicle is waiting for measurements to become valid, and 
                 # they have, so go to the next waypoint. We do not need to give 
                 # an explicit waypoint here since the vehicle never changes the 

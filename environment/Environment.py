@@ -1,11 +1,16 @@
+# Core imports
 import math
+
+# Library imports
+from dronekit import LocationLocal
+
+# Package imports
 from ..core.Import_Manager import Import_Manager
 from ..core.Thread_Manager import Thread_Manager
 from ..core.USB_Manager import USB_Manager
 from ..trajectory.Servo import Servo
 from ..vehicle.Vehicle import Vehicle
-from ..zigbee.XBee_Settings_Receiver import XBee_Settings_Receiver
-from dronekit import LocationLocal
+from ..zigbee.Settings_Receiver import Settings_Receiver
 
 class Environment(object):
     """
@@ -100,12 +105,12 @@ class Environment(object):
             pwm = servo["pwm"] if "pwm" in servo else None
             self._servos.append(Servo(servo["pin"], servo["angles"], pwm))
 
-        self._xbee_sensor = None
+        self._rf_sensor = None
         self._packet_callbacks = {}
-        self._setup_xbee_sensor()
+        self._setup_rf_sensor()
         self.invalidate_measurement()
 
-        self._settings_receiver = XBee_Settings_Receiver(self)
+        self._settings_receiver = Settings_Receiver(self)
 
         if self.settings.get("infrared_sensor"):
             from ..control.Infrared_Sensor import Infrared_Sensor
@@ -125,16 +130,16 @@ class Environment(object):
     def on_home_location(self, vehicle, attribute, home_location):
         self.geometry.set_home_location(home_location)
 
-    def _setup_xbee_sensor(self):
-        xbee_class = self.settings.get("xbee_type")
-        if xbee_class == "":
+    def _setup_rf_sensor(self):
+        rf_sensor_class = self.settings.get("rf_sensor_class")
+        if rf_sensor_class == "":
             return
 
-        xbee_type = self.import_manager.load_class(xbee_class,
-                                                   relative_module="zigbee")
-        self._xbee_sensor = xbee_type(self.arguments, self.thread_manager,
-                                      self.usb_manager, self.get_raw_location,
-                                      self.receive_packet, self.location_valid)
+        rf_sensor_type = self.import_manager.load_class(rf_sensor_class,
+                                                        relative_module="zigbee")
+        self._rf_sensor = rf_sensor_type(self.arguments, self.thread_manager,
+                                         self.usb_manager, self.get_raw_location,
+                                         self.receive_packet, self.location_valid)
 
     def get_vehicle(self):
         return self.vehicle
@@ -184,15 +189,15 @@ class Environment(object):
 
         return self._servos
 
-    def get_xbee_sensor(self):
+    def get_rf_sensor(self):
         """
-        Return the `XBee_Sensor` created by the Environment.
+        Return the `RF_Sensor` created by the Environment.
 
-        This method returns `None` if the "xbee_type" setting is not one of
-        "simulator" or "physical" during the Environment setup.
+        This method returns `None` if the RF sensor class is not defined
+        during the Environment setup.
         """
 
-        return self._xbee_sensor
+        return self._rf_sensor
 
     def get_infrared_sensor(self):
         """
@@ -206,7 +211,7 @@ class Environment(object):
 
     def add_packet_action(self, action, callback):
         """
-        Register a `callback` for a given XBee packet specification `action`.
+        Register a `callback` for a given packet specification `action`.
 
         The `action` must not already have a callback registered for it.
         When a packet with the specification `action` is received, then the
@@ -223,9 +228,9 @@ class Environment(object):
 
     def receive_packet(self, packet):
         """
-        Callback method for the receive callback of the `XBee_Sensor`.
+        Callback method for the receive callback of the `RF_Sensor`.
 
-        The given `packet` is an `XBee_Packet` that may have a specification
+        The given `packet` is a `Packet` object that may have a specification
         registered in `add_packet_action`.
         """
 
@@ -252,7 +257,7 @@ class Environment(object):
 
     def get_raw_location(self):
         """
-        Callback method for the location callback of the `XBee_Sensor`.
+        Callback method for the location callback of the `RF_Sensor`.
 
         The returned values are a tuple of vehicle coordinates, and the current
         waypoint index.
@@ -267,10 +272,10 @@ class Environment(object):
 
     def location_valid(self, other_valid=None, other_id=None, other_index=None):
         """
-        Callback method for the valid callback of the `XBee_Sensor`.
+        Callback method for the valid callback of the `RF_Sensor`.
 
         The argument `other_valid`, when given, indicates whether the location
-        of another vehicle is also valid. This vehicle is identified by its XBee
+        of another vehicle is also valid. This vehicle is identified by its RF
         sensor ID `other_id`, and is at waypoint index `other_index`. These must
         also be given in this case.
 
@@ -283,29 +288,29 @@ class Environment(object):
 
         location_valid = self.vehicle.is_current_location_valid()
 
-        if self._xbee_sensor is not None:
-            self._valid_measurements[self._xbee_sensor.id] = self.vehicle.get_next_waypoint()
+        if self._rf_sensor is not None:
+            self._valid_measurements[self._rf_sensor.id] = self.vehicle.get_next_waypoint()
         if other_id is not None and other_valid:
             self._valid_measurements[other_id] = other_index
 
         return location_valid
 
-    def _is_valid(self, xbee_id, index):
-        if xbee_id not in self._valid_measurements:
+    def _is_valid(self, rf_sensor_id, index):
+        if rf_sensor_id not in self._valid_measurements:
             return False
 
-        return self._valid_measurements[xbee_id] >= index
+        return self._valid_measurements[rf_sensor_id] >= index
 
     def is_measurement_valid(self):
         """
         Check whether the measurement at the current location was valid.
 
         Only returns `True` if both the current vehicle's location and the
-        other XBee's sent location were valid.
+        other RF sensor's sent location were valid.
         """
 
         index = self.vehicle.get_next_waypoint()
-        if not self._is_valid(self._xbee_sensor.id, index):
+        if not self._is_valid(self._rf_sensor.id, index):
             return False
 
         return all(self._is_valid(id, index) for id in self._required_sensors)
@@ -324,12 +329,12 @@ class Environment(object):
 
         self._valid_measurements = {}
 
-        if self._xbee_sensor is None:
+        if self._rf_sensor is None:
             self._required_sensors = set()
             return
 
         if required_sensors is None:
-            required_sensors = range(1, self._xbee_sensor.number_of_sensors + 1)
+            required_sensors = range(1, self._rf_sensor.number_of_sensors + 1)
 
         self._required_sensors = set(required_sensors)
 

@@ -2,7 +2,7 @@ import json
 import struct
 import zlib
 
-class XBee_Packet(object):
+class Packet(object):
     # Packet type specifications loaded from the JSON file.
     # The specifications are cached between packets.
     _specifications = None
@@ -143,12 +143,12 @@ class XBee_Packet(object):
             elif field["name"] in self._contents:
                 value = self._contents[field["name"]]
             else:
-                raise KeyError("Unable to serialize XBee packet with specification '{}': Field '{}' has not been provided.".format(specification_name, field["name"]))
+                raise KeyError("Unable to serialize packet with specification '{}': Field '{}' has not been provided.".format(specification_name, field["name"]))
 
             try:
                 packed_message += self._pack_field(field["format"], value)
             except struct.error as e:
-                raise ValueError("Unable to serialize XBee packet with specification '{}': struct error for field '{}': {}".format(specification_name, field["name"], e.message))
+                raise ValueError("Unable to serialize packet with specification '{}': struct error for field '{}': {}".format(specification_name, field["name"], e.message))
 
         return packed_message
 
@@ -225,7 +225,7 @@ class XBee_Packet(object):
             try:
                 data, offset = self._read_format(format, contents, offset)
             except struct.error as e:
-                raise ValueError("Unable to unserialize XBee packet with specification '{}': struct error for field '{}' at offset {}: {}".format(specification_name, name, offset, e.message))
+                raise ValueError("Unable to unserialize packet with specification '{}': struct error for field '{}' at offset {}: {}".format(specification_name, name, offset, e.message))
 
             self._contents[name] = data
 

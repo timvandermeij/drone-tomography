@@ -1,6 +1,6 @@
 import csv
 from Buffer import Buffer
-from ..zigbee.XBee_Packet import XBee_Packet
+from ..zigbee.Packet import Packet
 
 class Dataset_Buffer(Buffer):
     def __init__(self, settings=None):
@@ -60,7 +60,7 @@ class Dataset_Buffer(Buffer):
     def get(self):
         """
         Get a packet from the buffer (or None if the queue is empty). We create
-        the XBee packet object from the list on demand (as further explained
+        the `Packet` object from the list on demand (as further explained
         in the `put` method). The return value is a tuple of the original packet
         and the calibrated RSSI value.
         """
@@ -75,30 +75,30 @@ class Dataset_Buffer(Buffer):
         destination_id = self._positions.index(destination) + 1
         rssi = packet[2]
 
-        xbee_packet = XBee_Packet()
-        xbee_packet.set("specification", "rssi_ground_station")
-        xbee_packet.set("sensor_id", destination_id)
-        xbee_packet.set("from_latitude", source[0])
-        xbee_packet.set("from_longitude", source[1])
-        xbee_packet.set("from_valid", True)
-        xbee_packet.set("to_latitude", destination[0])
-        xbee_packet.set("to_longitude", destination[1])
-        xbee_packet.set("to_valid", True)
-        xbee_packet.set("rssi", rssi)
+        packet = Packet()
+        packet.set("specification", "rssi_ground_station")
+        packet.set("sensor_id", destination_id)
+        packet.set("from_latitude", source[0])
+        packet.set("from_longitude", source[1])
+        packet.set("from_valid", True)
+        packet.set("to_latitude", destination[0])
+        packet.set("to_longitude", destination[1])
+        packet.set("to_valid", True)
+        packet.set("rssi", rssi)
 
         calibrated_rssi = rssi - self._calibration[(source, destination)]
 
-        return (xbee_packet, calibrated_rssi)
+        return (packet, calibrated_rssi)
 
     def put(self, packet):
         """
         Put a packet into the buffer. The difference with the base class method
-        is that a packet is not an XBee packet object, but instead a list that
+        is that a packet is not a `Packet` object, but instead a list that
         contains the source sensor location, the destination sensor location and
-        the RSSI value. XBee packet objects will be generated from this information
+        the RSSI value. `Packet` objects will be generated from this information
         on demand in the `get` method. This optimization is required because the
         datasets typically contain many rows and columns, making creating all
-        XBee packet objects at once very time-consuming.
+        `Packet` objects at once very time-consuming.
         """
 
         if not isinstance(packet, list) or len(packet) != 3:

@@ -5,7 +5,7 @@ import copy
 import Queue
 from core_thread_manager import ThreadableTestCase
 from ..core.Thread_Manager import Thread_Manager
-from ..zigbee.XBee_Packet import XBee_Packet
+from ..zigbee.Packet import Packet
 from ..zigbee.XBee_Sensor import SensorClosedError
 from ..zigbee.XBee_Sensor_Simulator import XBee_Sensor_Simulator
 from ..settings import Arguments
@@ -25,7 +25,7 @@ class TestZigBeeXBeeSensorSimulator(ThreadableTestCase, SettingsTestCase):
         super(TestZigBeeXBeeSensorSimulator, self).setUp()
 
         self.sensor_id = 1
-        self.arguments = Arguments("settings.json", ["--xbee-id", "1"])
+        self.arguments = Arguments("settings.json", ["--rf-sensor-id", "1"])
         self.settings = self.arguments.get_settings("xbee_sensor_simulator")
         self.thread_manager = Thread_Manager()
         self.sensor = XBee_Sensor_Simulator(self.arguments, self.thread_manager,
@@ -69,7 +69,7 @@ class TestZigBeeXBeeSensorSimulator(ThreadableTestCase, SettingsTestCase):
         self.assertEqual(identity["joined"], True)
 
     def test_enqueue(self):
-        # Packets that are not XBee_Packet objects should be refused.
+        # Packets that are not `Packet` objects should be refused.
         with self.assertRaises(TypeError):
             self.sensor.enqueue({
                 "foo": "bar"
@@ -77,13 +77,13 @@ class TestZigBeeXBeeSensorSimulator(ThreadableTestCase, SettingsTestCase):
 
         # Private packets should be refused.
         with self.assertRaises(ValueError):
-            packet = XBee_Packet()
+            packet = Packet()
             packet.set("specification", "rssi_broadcast")
             self.sensor.enqueue(packet)
 
         # Packets that do not contain a destination should be broadcasted.
         # We subtract one because we do not send to ourself.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "waypoint_add")
         packet.set("latitude", 123456789.12)
         packet.set("longitude", 123459678.34)
@@ -97,7 +97,7 @@ class TestZigBeeXBeeSensorSimulator(ThreadableTestCase, SettingsTestCase):
         self.sensor._queue = Queue.Queue()
 
         # Valid packets should be enqueued.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "waypoint_add")
         packet.set("latitude", 123456789.12)
         packet.set("longitude", 123459678.34)
@@ -118,7 +118,7 @@ class TestZigBeeXBeeSensorSimulator(ThreadableTestCase, SettingsTestCase):
 
     def test_send_custom_packets(self):
         # If the queue contains packets, some of them must be sent.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "waypoint_add")
         packet.set("latitude", 123456789.12)
         packet.set("longitude", 123459678.34)
@@ -133,7 +133,7 @@ class TestZigBeeXBeeSensorSimulator(ThreadableTestCase, SettingsTestCase):
 
     def test_receive(self):
         # Create a packet from sensor 2 to the current sensor.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "rssi_broadcast")
         packet.set("latitude", 123456789.12)
         packet.set("longitude", 123459678.34)

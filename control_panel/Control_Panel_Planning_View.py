@@ -450,9 +450,9 @@ class Control_Panel_Planning_View(Control_Panel_View):
                     self._update_running(False)
                     return
 
-        # Set the running state for the planning runner, and stop the XBee from 
+        # Set the running state for the planning runner, and stop the RF sensor from 
         # taking up cycles during the algorithm.
-        self._controller.xbee.deactivate()
+        self._controller.rf_sensor.deactivate()
         self._runner.activate()
 
         # Change the tab widget to show the runner state.
@@ -499,10 +499,10 @@ class Control_Panel_Planning_View(Control_Panel_View):
         self._timer.start()
 
     def _stop(self):
-        # Set the planning runner state to stopped, and reactivate the XBee.
+        # Set the planning runner state to stopped, and reactivate the RF sensor.
         self._update_running(False)
         self._runner.deactivate()
-        self._controller.xbee.activate()
+        self._controller.rf_sensor.activate()
 
     def _check(self):
         # Update progress bar completion percentage every time, not only when 

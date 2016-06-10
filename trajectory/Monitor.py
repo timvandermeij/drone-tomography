@@ -18,6 +18,7 @@ class Monitor(object):
         self.step_delay = self.settings.get("step_delay")
 
         self.sensors = self.environment.get_distance_sensors()
+        self.rf_sensor = self.environment.get_rf_sensor()
 
         self.colors = ["red", "purple", "black"]
 
@@ -38,9 +39,8 @@ class Monitor(object):
             from Plot import Plot
             self.plot = Plot(self.environment, self.memory_map)
 
-        xbee_sensor = self.environment.get_xbee_sensor()
-        if xbee_sensor is not None:
-            xbee_sensor.activate()
+        if self.rf_sensor is not None:
+            self.rf_sensor.activate()
 
     def step(self, add_point=None):
         """
@@ -107,16 +107,14 @@ class Monitor(object):
     def start(self):
         self.mission.start()
 
-        xbee_sensor = self.environment.get_xbee_sensor()
-        if xbee_sensor is not None:
-            xbee_sensor.start()
+        if self.rf_sensor is not None:
+            self.rf_sensor.start()
 
     def stop(self):
         self.mission.stop()
 
-        xbee_sensor = self.environment.get_xbee_sensor()
-        if xbee_sensor is not None:
-            xbee_sensor.stop()
+        if self.rf_sensor is not None:
+            self.rf_sensor.stop()
 
         if self.plot:
             self.plot.close()

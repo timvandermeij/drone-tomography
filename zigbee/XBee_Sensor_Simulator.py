@@ -2,7 +2,7 @@ import random
 import socket
 import thread
 import time
-from XBee_Packet import XBee_Packet
+from Packet import Packet
 from XBee_Sensor import XBee_Sensor, SensorClosedError
 
 class XBee_Sensor_Simulator(XBee_Sensor):
@@ -78,7 +78,7 @@ class XBee_Sensor_Simulator(XBee_Sensor):
                     continue
 
                 # Unserialize the data (byte-encoded string).
-                packet = XBee_Packet()
+                packet = Packet()
                 packet.unserialize(data)
                 self._receive(packet)
         except SensorClosedError:

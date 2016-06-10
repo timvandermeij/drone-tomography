@@ -303,7 +303,7 @@ The waypoints view makes it possible to define a mission when the vehicles are
 operating in the `Mission_XBee` mission. You can add waypoints in each table 
 and optionally synchronize between vehicles at each waypoint. It is possible to 
 import and export JSON waypoints for later usage. The waypoints are sent to the 
-vehicles using custom XBee packets.
+vehicles using custom packets.
 
 ### Settings view
 

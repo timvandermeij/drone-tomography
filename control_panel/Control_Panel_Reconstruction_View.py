@@ -195,7 +195,7 @@ class Stream_Recorder(object):
 
         self._controller = controller
 
-        self._number_of_sensors = controller.xbee.number_of_sensors
+        self._number_of_sensors = controller.rf_sensor.number_of_sensors
         self._origin = settings.get("stream_network_origin")
         self._size = settings.get("stream_network_size")
 
@@ -540,7 +540,7 @@ class Control_Panel_Reconstruction_View(Control_Panel_View):
         self._buffer = buffer_class(settings)
 
         if isinstance(self._buffer, Stream_Buffer):
-            self._buffer.register_xbee(self._controller.xbee)
+            self._buffer.register_rf_sensor(self._controller.rf_sensor)
 
             if settings.get("stream_record") or settings.get("stream_calibrate"):
                 # Create a stream recorder instance to record all incoming 

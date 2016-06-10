@@ -1,10 +1,10 @@
 import json
 import os
 from PyQt4 import QtGui
+from Control_Panel_RF_Sensor_Sender import Control_Panel_RF_Sensor_Sender
 from Control_Panel_View import Control_Panel_View
 from Control_Panel_Waypoints_Widgets import WaypointsTableWidget
-from Control_Panel_XBee_Sender import Control_Panel_XBee_Sender
-from ..zigbee.XBee_Packet import XBee_Packet
+from ..zigbee.Packet import Packet
 
 class Control_Panel_Waypoints_View(Control_Panel_View):
     def __init__(self, controller, settings):
@@ -28,7 +28,7 @@ class Control_Panel_Waypoints_View(Control_Panel_View):
         self._listWidget = QtGui.QListWidget()
         self._stackedLayout = QtGui.QStackedLayout()
 
-        for vehicle in xrange(1, self._controller.xbee.number_of_sensors + 1):
+        for vehicle in xrange(1, self._controller.rf_sensor.number_of_sensors + 1):
             # Create the list item for the vehicle.
             self._listWidget.addItem("Waypoints for vehicle {}".format(vehicle))
 
@@ -341,19 +341,19 @@ class Control_Panel_Waypoints_View(Control_Panel_View):
             "max_retries": self._max_retries,
             "retry_interval": self._retry_interval
         }
-        sender = Control_Panel_XBee_Sender(self._controller, waypoints, total,
-                                           configuration)
+        sender = Control_Panel_RF_Sensor_Sender(self._controller, waypoints, total,
+                                                configuration)
         sender.start()
 
     def _make_add_waypoint_packet(self, vehicle, index, waypoint):
         """
-        Create a `XBee_Packet` object with the `waypoint_add` specification
+        Create a `Packet` object with the `waypoint_add` specification
         and fill its fields with correct values.
 
-        This is a callback for the `Control_Panel_XBee_Sender`.
+        This is a callback for the `Control_Panel_RF_Sensor_Sender`.
         """
 
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "waypoint_add")
         packet.set("latitude", waypoint[0])
         packet.set("longitude", waypoint[1])

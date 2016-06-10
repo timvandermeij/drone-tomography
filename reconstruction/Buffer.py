@@ -1,5 +1,5 @@
 import Queue
-from ..zigbee.XBee_Packet import XBee_Packet
+from ..zigbee.Packet import Packet
 
 class Buffer(object):
     def __init__(self, settings=None):
@@ -32,8 +32,8 @@ class Buffer(object):
         Put a packet into the buffer.
         """
 
-        if not isinstance(packet, XBee_Packet):
-            raise ValueError("The provided packet is not an XBee packet.")
+        if not isinstance(packet, Packet):
+            raise ValueError("The provided packet is not a `Packet` object.")
 
         self._queue.put(packet)
 

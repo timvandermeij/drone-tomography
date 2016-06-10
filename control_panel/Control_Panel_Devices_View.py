@@ -1,11 +1,11 @@
 from PyQt4 import QtCore, QtGui
 from Control_Panel_View import Control_Panel_View
 
-class XBee_Device_Category(object):
+class Device_Category(object):
     COORDINATOR = 0
     END_DEVICE = 2
 
-class XBee_Device(object):
+class Device(object):
     def __init__(self, name, id, category):
         self.name = name
         self.id = id
@@ -29,12 +29,12 @@ class Control_Panel_Devices_View(Control_Panel_View):
             return
 
         self._devices = [
-            XBee_Device("Ground station", 0, XBee_Device_Category.COORDINATOR)
+            Device("Ground station", 0, Device_Category.COORDINATOR)
         ]
 
-        for index in xrange(1, self._controller.xbee.number_of_sensors + 1):
-            self._devices.append(XBee_Device("Vehicle {}".format(index), index,
-                                             XBee_Device_Category.END_DEVICE))
+        for index in xrange(1, self._controller.rf_sensor.number_of_sensors + 1):
+            self._devices.append(Device("Vehicle {}".format(index), index,
+                                        Device_Category.END_DEVICE))
 
     def save(self):
         return {
@@ -84,8 +84,8 @@ class Control_Panel_Devices_View(Control_Panel_View):
         """
 
         categories = {
-            XBee_Device_Category.COORDINATOR: "Coordinator",
-            XBee_Device_Category.END_DEVICE: "End device"
+            Device_Category.COORDINATOR: "Coordinator",
+            Device_Category.END_DEVICE: "End device"
         }
 
         # Add an entry in the tree view for each device.
@@ -112,7 +112,7 @@ class Control_Panel_Devices_View(Control_Panel_View):
         Refresh the status of the ground station.
         """
 
-        identity = self._controller.xbee.get_identity()
+        identity = self._controller.rf_sensor.get_identity()
 
         ground_station = self._devices[0]
         ground_station.address = identity["address"]
@@ -135,7 +135,7 @@ class Control_Panel_Devices_View(Control_Panel_View):
         Refresh the status of the vehicles.
         """
 
-        self._controller.xbee.discover(self._refresh_vehicle)
+        self._controller.rf_sensor.discover(self._refresh_vehicle)
 
         self._timer = QtCore.QTimer()
         self._timer.setInterval(self._discover_interval * 1000)
@@ -145,8 +145,7 @@ class Control_Panel_Devices_View(Control_Panel_View):
 
     def _refresh_vehicle(self, packet):
         """
-        Refresh a single vehicle using information from in
-        node discovery XBee packet.
+        Refresh a single vehicle using information from a node discovery `packet`.
         """
 
         vehicle = self._devices[packet["id"]]

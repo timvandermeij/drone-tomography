@@ -90,7 +90,7 @@ class Mission(object):
         self.farness = self.settings.get("farness")
 
         # Whether to synchronize vehicles at waypoints
-        self._xbee_synchronization = self.settings.get("xbee_synchronization")
+        self._rf_sensor_synchronization = self.settings.get("rf_sensor_synchronization")
 
         # Create a memory map for the vehicle to track where it has seen 
         # objects. This can later be used to find the target object or to fly 

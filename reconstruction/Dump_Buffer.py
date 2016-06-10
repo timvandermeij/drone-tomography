@@ -1,6 +1,6 @@
 import json
 from Buffer import Buffer
-from ..zigbee.XBee_Packet import XBee_Packet
+from ..zigbee.Packet import Packet
 
 class Dump_Buffer(Buffer):
     def __init__(self, settings=None):
@@ -32,7 +32,7 @@ class Dump_Buffer(Buffer):
         # - origin: a list containing the coordinates of the network's origin
         # - size: a list containing the width and height of the network
         # - packets: a list containing one list per packet, where each packet list
-        #            contains the data from the XBee packet specification
+        #            contains the data from the packet specification
         #            "rssi_ground_station" (in order)
         with open(settings.get("dump_file"), "r") as dump_file:
             data = json.load(dump_file)
@@ -47,7 +47,7 @@ class Dump_Buffer(Buffer):
     def get(self):
         """
         Get a packet from the buffer (or None if the queue is empty). We create
-        the XBee packet object from the list on demand (as further explained
+        the `Packet` object from the list on demand (as further explained
         in the `put` method). The return value is a tuple of the original packet
         and the calibrated RSSI value.
         """
@@ -57,7 +57,7 @@ class Dump_Buffer(Buffer):
 
         dump = self._queue.get()
 
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "rssi_ground_station")
         packet.set_dump(dump)
 
@@ -70,12 +70,12 @@ class Dump_Buffer(Buffer):
     def put(self, packet):
         """
         Put a packet into the buffer. The difference with the base class method
-        is that a packet is not an XBee packet object, but instead a list that
-        contains the data from the XBee packet fields in order. XBee packet
-        objects will be generated from this information on demand in the `get`
-        method. This optimization is required because the dumps typically
-        contain many measurements, making creating all XBee packet objects at
-        once very time-consuming.
+        is that a packet is not a `Packet` object, but instead a list that
+        contains the data from the packet fields in order. `Packet` objects
+        are generated from this information on demand in the `get` method. This
+        optimization is required because the dumps typically contain many
+        measurements, making creating all `Packet` objects at once very
+        time-consuming.
         """
 
         if not isinstance(packet, list) or len(packet) != 8:

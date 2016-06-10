@@ -10,7 +10,7 @@ from mock import patch
 
 # Package imports
 from ..core.Thread_Manager import Thread_Manager
-from ..zigbee.XBee_Packet import XBee_Packet
+from ..zigbee.Packet import Packet
 from ..zigbee.XBee_Sensor import SensorClosedError
 from ..zigbee.XBee_Sensor_Physical import XBee_Sensor_Physical
 from ..settings import Arguments
@@ -117,7 +117,7 @@ class TestZigBeeXBeeSensorPhysical(USBManagerTestCase, ThreadableTestCase, Setti
             self.sensor._send()
 
     def test_enqueue(self):
-        # Packets that are not `XBee_Packet` objects should be refused.
+        # Packets that are not `Packet` objects should be refused.
         with self.assertRaises(TypeError):
             self.sensor.enqueue({
                 "foo": "bar"
@@ -125,13 +125,13 @@ class TestZigBeeXBeeSensorPhysical(USBManagerTestCase, ThreadableTestCase, Setti
 
         # Private packets should be refused.
         with self.assertRaises(ValueError):
-            packet = XBee_Packet()
+            packet = Packet()
             packet.set("specification", "rssi_broadcast")
             self.sensor.enqueue(packet)
 
         # Packets that do not contain a destination should be broadcasted.
         # We subtract one because we do not send to ourself.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "waypoint_add")
         packet.set("latitude", 123456789.12)
         packet.set("longitude", 123459678.34)
@@ -145,7 +145,7 @@ class TestZigBeeXBeeSensorPhysical(USBManagerTestCase, ThreadableTestCase, Setti
         self.sensor._queue = Queue.Queue()
 
         # Valid packets should be enqueued.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "waypoint_add")
         packet.set("latitude", 123456789.12)
         packet.set("longitude", 123459678.34)
@@ -180,7 +180,7 @@ class TestZigBeeXBeeSensorPhysical(USBManagerTestCase, ThreadableTestCase, Setti
         # for transmitting the valid packet. After transmission, the packet
         # should be removed from the data object.
         mock_send.call_count = 0
-        valid_packet = XBee_Packet()
+        valid_packet = Packet()
         valid_packet.set("specification", "rssi_ground_station")
         valid_packet.set("sensor_id", self.sensor_id)
         valid_packet.set("from_latitude", 123456789.12)
@@ -209,7 +209,7 @@ class TestZigBeeXBeeSensorPhysical(USBManagerTestCase, ThreadableTestCase, Setti
         mock_send.call_count = 0
 
         # If the queue contains custom packets, some of them must be sent.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "waypoint_add")
         packet.set("latitude", 123456789.12)
         packet.set("longitude", 123459678.34)
@@ -229,7 +229,7 @@ class TestZigBeeXBeeSensorPhysical(USBManagerTestCase, ThreadableTestCase, Setti
 
         # Valid RX packets should be processed. Store the frame ID
         # for the DB call test following this test.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "rssi_broadcast")
         packet.set("latitude", 123456789.12)
         packet.set("longitude", 123459678.34)
@@ -347,7 +347,7 @@ class TestZigBeeXBeeSensorPhysical(USBManagerTestCase, ThreadableTestCase, Setti
     @patch.object(XBee_Sensor_Physical, "_receive", side_effect=ValueError)
     @patch.object(XBee_Sensor_Physical, "_error")
     def test_receive_error(self, error_mock, receive_mock):
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "rssi_broadcast")
         packet.set("latitude", 123456789.12)
         packet.set("longitude", 123459678.34)

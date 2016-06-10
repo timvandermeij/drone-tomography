@@ -1,11 +1,11 @@
 import json
 from PyQt4 import QtGui
+from Control_Panel_RF_Sensor_Sender import Control_Panel_RF_Sensor_Sender
 from Control_Panel_View import Control_Panel_View, Control_Panel_View_Name
 from Control_Panel_Widgets import QLineEditClear
 from Control_Panel_Settings_Widgets import SettingsWidget
-from Control_Panel_XBee_Sender import Control_Panel_XBee_Sender
 from ..settings import Settings
-from ..zigbee.XBee_Packet import XBee_Packet
+from ..zigbee.Packet import Packet
 
 class Setting_Filter_Match(object):
     NONE = 0
@@ -116,7 +116,7 @@ class Control_Panel_Settings_View(Control_Panel_View):
         except KeyError:
             devices = []
 
-        for vehicle in xrange(1, self._controller.xbee.number_of_sensors + 1):
+        for vehicle in xrange(1, self._controller.rf_sensor.number_of_sensors + 1):
             if vehicle < len(devices):
                 vehicleJoined = devices[vehicle].joined
             else:
@@ -156,7 +156,7 @@ class Control_Panel_Settings_View(Control_Panel_View):
 
         boxLayout = QtGui.QVBoxLayout()
         boxLayout.addWidget(groundCheckBox)
-        for vehicle in xrange(1, self._controller.xbee.number_of_sensors + 1):
+        for vehicle in xrange(1, self._controller.rf_sensor.number_of_sensors + 1):
             boxLayout.addWidget(vehicleCheckBoxes[vehicle])
 
         groupBox = QtGui.QGroupBox("Save locations")
@@ -209,7 +209,7 @@ class Control_Panel_Settings_View(Control_Panel_View):
         vehicle_settings = {}
         keys = sorted(self._new_settings.keys())
         count = 0
-        for vehicle in xrange(1, self._controller.xbee.number_of_sensors + 1):
+        for vehicle in xrange(1, self._controller.rf_sensor.number_of_sensors + 1):
             if vehicleCheckBoxes[vehicle].isChecked():
                 vehicle_settings[vehicle] = keys
                 count += len(keys)
@@ -229,8 +229,8 @@ class Control_Panel_Settings_View(Control_Panel_View):
             "max_retries": self._settings.get("settings_max_retries"),
             "retry_interval": self._settings.get("settings_retry_interval")
         }
-        sender = Control_Panel_XBee_Sender(self._controller, vehicle_settings,
-                                           count, configuration)
+        sender = Control_Panel_RF_Sensor_Sender(self._controller, vehicle_settings,
+                                                count, configuration)
 
         if groundCheckBox.isChecked():
             sender.connect_accepted(self._set_ground_station_settings)
@@ -238,7 +238,7 @@ class Control_Panel_Settings_View(Control_Panel_View):
         sender.start()
 
     def _make_add_setting_packet(self, vehicle, index, key):
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "setting_add")
         packet.set("index", index)
         packet.set("key", str(key))

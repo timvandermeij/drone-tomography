@@ -30,7 +30,7 @@ class Coordinator(object):
 
     def update(self, packet, calibrated_rssi):
         """
-        Update the weight matrix and RSSI vector given an XBee packet object `packet`
+        Update the weight matrix and RSSI vector given a `Packet` object `packet`
         and a calibrated RSSI value `calibrated_rssi`. The latter parameter is equal
         to the original RSSI for the stream data source when calibration mode is enabled.
         """

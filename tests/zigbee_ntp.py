@@ -2,7 +2,7 @@ import time
 import unittest
 from mock import MagicMock, patch
 from ..zigbee.NTP import NTP
-from ..zigbee.XBee_Packet import XBee_Packet
+from ..zigbee.Packet import Packet
 
 class TestZigBeeNTP(unittest.TestCase):
     def setUp(self):
@@ -33,7 +33,7 @@ class TestZigBeeNTP(unittest.TestCase):
     @patch.object(NTP, "finish")
     def test_process(self, mock_finish):
         # Construct the NTP packet for the second and third timestamp.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "ntp")
         packet.set("sensor_id", self._sensor.id)
         packet.set("timestamp_1", 42)
@@ -59,7 +59,7 @@ class TestZigBeeNTP(unittest.TestCase):
         self.assertEqual(to, packet.get("sensor_id"))
 
         # Construct the NTP packet for the fourth timestamp.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "ntp")
         packet.set("sensor_id", self._sensor.id)
         packet.set("timestamp_1", 42)
@@ -85,7 +85,7 @@ class TestZigBeeNTP(unittest.TestCase):
     @patch("subprocess.call")
     def test_finish(self, mock_subprocess_call):
         # Construct a complete NTP packet.
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "ntp")
         packet.set("sensor_id", 1)
         packet.set("timestamp_1", 100)

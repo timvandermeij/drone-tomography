@@ -9,7 +9,7 @@ markdown
 py-gfm
 
 # Physical sensor/communication interfaces
-pyserial
+pyserial>=3.0
 RPi.GPIO
 wiringpi
 xbee

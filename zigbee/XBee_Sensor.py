@@ -4,8 +4,8 @@ import time
 from ..core.Threadable import Threadable
 from ..reconstruction.Buffer import Buffer
 from ..settings import Arguments
+from Packet import Packet
 from TDMA_Scheduler import TDMA_Scheduler
-from XBee_Packet import XBee_Packet
 
 # pylint: disable=undefined-all-variable
 __all__ = [
@@ -39,7 +39,7 @@ class XBee_Sensor(Threadable):
         requires certian callbacks. The `location_callback` is called whenever the
         XBee needs to know its own location for the "rssi_broadcast" and the
         "rssi_ground_station" private packets. The `receive_callback` is called
-        whenever any non-private packets are received and has the `XBee_Packet`
+        whenever any non-private packets are received and has the `Packet`
         as an argument. Finally, the `valid_callback` is called shortly after
         the `location_callback` is called, and may be given a boolean argument
         indicating whether another XBee sensor has a valid location, but only
@@ -65,7 +65,7 @@ class XBee_Sensor(Threadable):
             raise ValueError("'arguments' must be an instance of Arguments")
 
         self._sensor = None
-        self._id = self._settings.get("xbee_id")
+        self._id = self._settings.get("rf_sensor_id")
         self._number_of_sensors = self._settings.get("number_of_sensors")
         self._buffer = None
         self._address = None
@@ -135,8 +135,8 @@ class XBee_Sensor(Threadable):
         Enqueue a custom packet to send to another XBee device.
         """
 
-        if not isinstance(packet, XBee_Packet):
-            raise TypeError("Only XBee_Packet objects can be enqueued")
+        if not isinstance(packet, Packet):
+            raise TypeError("Only `Packet` objects can be enqueued")
 
         if packet.is_private():
             raise ValueError("Private packets cannot be enqueued")
@@ -179,7 +179,7 @@ class XBee_Sensor(Threadable):
         Send a TX frame to another sensor.
         """
 
-        if not isinstance(packet, XBee_Packet):
+        if not isinstance(packet, Packet):
             raise ValueError("Invalid packet specified")
 
         if to is None:
@@ -208,15 +208,15 @@ class XBee_Sensor(Threadable):
 
     def _make_rssi_broadcast_packet(self):
         """
-        Create an XBee_Packet object containing current location data.
+        Create a `Packet` object containing current location data.
 
-        The XBee packet is complete, including location validity, the sensor ID
+        The packet is complete, including location validity, the sensor ID
         and the current timestamp.
         """
 
         location, waypoint_index = self._location_callback()
 
-        packet = XBee_Packet()
+        packet = Packet()
         packet.set("specification", "rssi_broadcast")
         packet.set("latitude", location[0])
         packet.set("longitude", location[1])
@@ -229,9 +229,9 @@ class XBee_Sensor(Threadable):
 
     def _make_rssi_ground_station_packet(self, rssi_packet):
         """
-        Create an XBee_Packet object containing location data of the current
-        XBee and data from an XBee_Packet `rssi_packet`. The `rssi_packet`
-        must have an "rssi_broadcast" specification.
+        Create a `Packet` object containing location data of the current
+        XBee and data from an `rssi_packet`. The `rssi_packet` must have
+        an "rssi_broadcast" specification.
 
         The resulting packet is only missing RSSI information.
 
@@ -249,7 +249,7 @@ class XBee_Sensor(Threadable):
                                               other_id=from_id,
                                               other_index=from_waypoint_index)
 
-        ground_station_packet = XBee_Packet()
+        ground_station_packet = Packet()
         ground_station_packet.set("specification", "rssi_ground_station")
         ground_station_packet.set("sensor_id", self._id)
         ground_station_packet.set("from_latitude", rssi_packet.get("latitude"))
