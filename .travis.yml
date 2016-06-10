@@ -1,18 +1,25 @@
 language: python
 python:
-  - "2.7"
+    - "2.7.9"
+addons:
+    apt:
+        packages:
+            - xsltproc
+before_install:
+    - ./travis.sh
 install:
-  - pip install pyserial
-  - pip install xbee
-  - pip install pymavlink
-  - pip install dronekit
-  - pip install PyOpenGL
-  - pip install simpleparse
-  - pip install PyVRML97
-  - pip install PyDispatcher
-  - pip install coverage
-  - pip install pylint
-  - pip install pyudev
+    - export LD_LIBRARY_PATH=$HOME/.local/lib
+    - export LIBRARY_PATH=$HOME/.local/lib
+    - export CPATH=$HOME/.local/include
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+cache:
+    pip: true
+    directories:
+        - $HOME/lirc
+        - $HOME/sip-4.18
+        - $HOME/PyQt-x11-gpl-4.11.4
 script: make test
+sudo: true
 notifications:
-  email: false
+    email: false

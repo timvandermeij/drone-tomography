@@ -53,7 +53,7 @@ class WiringPiTestCase(unittest.TestCase):
             # Unload the modules to ensure they are reloaded when the WiringPi 
             # instance is recreated.
             import_manager = Import_Manager()
-            for module in ("RPi", "RPi.GPIO", "wiringpi"):
+            for module in ("RPi", "RPi.GPIO", "RPi._GPIO", "wiringpi"):
                 import_manager.unload(module, relative=False)
 
 class TestCoreWiringPi(WiringPiTestCase):

@@ -1,11 +1,16 @@
+# Core imports
 import math
+
+# Library imports
+from dronekit import LocationLocal
+
+# Package imports
 from ..core.Import_Manager import Import_Manager
 from ..core.Thread_Manager import Thread_Manager
 from ..core.USB_Manager import USB_Manager
 from ..trajectory.Servo import Servo
 from ..vehicle.Vehicle import Vehicle
 from ..zigbee.Settings_Receiver import Settings_Receiver
-from dronekit import LocationLocal
 
 class Environment(object):
     """
